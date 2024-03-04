@@ -1,0 +1,128 @@
+import math
+import os
+from typing import Union, List
+
+import bpy
+import numpy as np
+from mathutils import Euler
+
+from bpy_helper.io import get_the_one_node_with_type
+
+
+def remove_all_lights():
+    # remove all lights
+    light_objs = []
+    for obj in bpy.data.objects:
+        if obj.type == 'LIGHT':
+            # bpy.data.objects.remove(obj)
+            light_objs.append(obj)
+    for obj in light_objs:
+        bpy.data.objects.remove(obj)
+
+    world = bpy.context.scene.world
+    nodes = world.node_tree.nodes
+
+    # clear the world background links
+    world.use_nodes = True
+    if len(world.node_tree.nodes['Background'].inputs[0].links) > 0:
+        world.node_tree.links.remove(world.node_tree.nodes['Background'].inputs[0].links[0])
+    # clear the world background nodes
+    for node in nodes:
+        if node.type in ['TEX_ENVIRONMENT', 'TEX_COORD', 'MAPPING']:
+            nodes.remove(node)
+
+
+def create_point_light(location, power=800, rgb=(1., 1., 1.), keep_other_lights=False):
+    """
+    Creates a point light at the given location.
+    (This function is deprecated, it's currently kept for backward compatibility, please use create_point_lights instead)
+    :param location:
+    :param power:
+    :param keep_other_lights:
+    :return:
+    """
+    if not keep_other_lights:
+        remove_all_lights()
+
+    # Set the background ambient light
+    bpy.context.scene.world.node_tree.nodes["Background"].inputs[1].default_value = 1.0
+
+    light_data = bpy.data.lights.new(name="PointLight", type="POINT")
+    light_data.energy = power
+    light_data.color = rgb
+    light_obj = bpy.data.objects.new("PointLight", light_data)
+    bpy.context.collection.objects.link(light_obj)
+    light_obj.location = location
+    return light_obj
+
+
+def create_area_light(location, power=800, size=5., keep_other_lights=False):
+    if not keep_other_lights:
+        remove_all_lights()
+
+    light_data = bpy.data.lights.new(name="AreaLight", type="AREA")
+    light_data.size = size
+    light_data.energy = power
+    light_data.color = (1, 1, 1)
+    light_data.shape = 'DISK'
+
+    light_obj = bpy.data.objects.new("AreaLight", light_data)
+    bpy.context.collection.objects.link(light_obj)
+    light_obj.location = location
+
+    direction_to_origin_azimuth = math.atan2(0 - light_obj.location.y, 0 - light_obj.location.x)
+    direction_to_origin_elevation = math.atan2(0 - light_obj.location.z, math.sqrt(
+        (0 - light_obj.location.x) ** 2 + (0 - light_obj.location.y) ** 2))
+    light_obj.rotation_euler = (0, direction_to_origin_elevation, direction_to_origin_azimuth)
+
+    return light_obj
+
+
+def set_env_light(path_to_hdr_file: str, strength: float = 1.0,
+                  rotation_euler: Union[list, Euler, np.ndarray] = None, keep_other_lights: bool = False):
+    """
+    Sets the world background to the given hdr_file.
+
+    :param path_to_hdr_file: Path to the .exr file
+    :param strength: The brightness of the background.
+    :param rotation_euler: The euler angles of the background.
+    :param keep_other_lights: If true, the other lights will not be removed.
+    """
+    if not keep_other_lights:
+        remove_all_lights()
+
+    scene = bpy.context.scene
+    world = scene.world
+    nodes = world.node_tree.nodes
+    links = world.node_tree.links
+
+    if rotation_euler is None:
+        rotation_euler = [0.0, 0.0, 0.0]
+
+    if not os.path.exists(path_to_hdr_file):
+        raise FileNotFoundError(f"The given path does not exists: {path_to_hdr_file}")
+
+    # add a texture node and load the image and link it
+    texture_node = nodes.new(type="ShaderNodeTexEnvironment")
+    texture_node.image = bpy.data.images.load(path_to_hdr_file, check_existing=True)
+
+    # get the one background node of the world shader
+    background_node = get_the_one_node_with_type(nodes, "Background")
+
+    # link the new texture node to the background
+    links.new(texture_node.outputs["Color"], background_node.inputs["Color"])
+
+    # Set the brightness of the background
+    background_node.inputs["Strength"].default_value = strength
+
+    # add a mapping node and a texture coordinate node
+    mapping_node = nodes.new("ShaderNodeMapping")
+    tex_coords_node = nodes.new("ShaderNodeTexCoord")
+
+    # link the texture coordinate node to mapping node
+    links.new(tex_coords_node.outputs["Generated"], mapping_node.inputs["Vector"])
+
+    # link the mapping node to the texture node
+    links.new(mapping_node.outputs["Vector"], texture_node.inputs["Vector"])
+
+    mapping_node.inputs["Rotation"].default_value = rotation_euler
