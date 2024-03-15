@@ -4,7 +4,7 @@ from typing import Union, List
 
 import bpy
 import numpy as np
-from mathutils import Euler
+from mathutils import Euler, Vector
 
 from bpy_helper.io import get_the_one_node_with_type
 
@@ -70,10 +70,26 @@ def create_area_light(location, power=800, size=5., keep_other_lights=False):
     bpy.context.collection.objects.link(light_obj)
     light_obj.location = location
 
-    direction_to_origin_azimuth = math.atan2(0 - light_obj.location.y, 0 - light_obj.location.x)
-    direction_to_origin_elevation = math.atan2(0 - light_obj.location.z, math.sqrt(
-        (0 - light_obj.location.x) ** 2 + (0 - light_obj.location.y) ** 2))
-    light_obj.rotation_euler = (0, direction_to_origin_elevation, direction_to_origin_azimuth)
+    direction = Vector([0, 0, 0]) - Vector(location)
+    light_obj.rotation_euler = direction.to_track_quat('-Z', 'Y').to_euler()
+
+    return light_obj
+
+
+def create_directional_light(location, power=800, rgb=(1., 1., 1.), keep_other_lights=False):
+    if not keep_other_lights:
+        remove_all_lights()
+
+    light_data = bpy.data.lights.new(name="DirectionalLight", type="SUN")
+    light_data.energy = power
+    light_data.color = rgb
+
+    light_obj = bpy.data.objects.new("DirectionalLight", light_data)
+    bpy.context.collection.objects.link(light_obj)
+    light_obj.location = location
+
+    direction = Vector([0, 0, 0]) - Vector(location)
+    light_obj.rotation_euler = direction.to_track_quat('-Z', 'Y').to_euler()
 
     return light_obj
 

@@ -72,8 +72,6 @@ def render_depth_map(output_dir, file_prefix='depth'):
     output_file.base_path = output_dir
     output_file.format.file_format = "OPEN_EXR"
     # set a different path (in case overwrite last file)
-    # Set the background ambient light brighter for BLIP
-    bpy.context.scene.world.node_tree.nodes["Background"].inputs[1].default_value = 30.0
     bpy.context.scene.render.filepath = f'{output_dir}/rgb_for_{file_prefix}.png'
     output_file.file_slots.values()[0].path = file_prefix
 

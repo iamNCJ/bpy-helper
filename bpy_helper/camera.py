@@ -71,10 +71,10 @@ def create_camera(transform_matrix, fov=30):
 def look_at_to_c2w(camera_position, target_position=[0.0, 0.0, 0.0], up_dir=[0.0, 0.0, 1.0]):
     """
     Look at transform matrix
-    :param camera_position:
-    :param target_position:
-    :param up_dir:
-    :return:
+    :param camera_position: camera position
+    :param target_position: target position, default is origin
+    :param up_dir: up vector, default is z-axis up
+    :return: camera to world matrix
     """
     camera_direction = np.array(camera_position) - np.array(target_position)
     camera_direction = camera_direction / np.linalg.norm(camera_direction)
