@@ -4,7 +4,11 @@ import bpy
 import mathutils
 
 
-def remove_default_objects():
+def remove_default_objects() -> None:
+    """
+    Removes the default objects from the scene.
+    """
+
     objects_to_remove = ["Cube", "Camera", "Light"]
 
     for obj_name in objects_to_remove:
@@ -15,15 +19,22 @@ def remove_default_objects():
             bpy.ops.object.delete()
 
 
-def reset_scene():
+def reset_scene() -> None:
+    """
+    Resets the scene to the default state.
+    """
+
     bpy.ops.wm.read_homefile()
 
     # Remove the default cube
     remove_default_objects()
 
 
-def import_3d_model(object_path):
-    """Loads a 3d model into the scene."""
+def import_3d_model(object_path) -> None:
+    """
+    Loads a 3d model into the scene.
+    """
+
     if object_path.endswith(".glb"):
         bpy.ops.import_scene.gltf(filepath=object_path, merge_vertices=True)
     elif object_path.endswith(".obj"):
@@ -35,18 +46,34 @@ def import_3d_model(object_path):
 
 
 def scene_root_objects():
+    """
+    Yields all root objects in the scene.
+    """
+
     for obj in bpy.context.scene.objects.values():
         if not obj.parent:
             yield obj
 
 
 def scene_meshes():
+    """
+    Yields all mesh objects in the scene.
+    """
+
     for obj in bpy.context.scene.objects.values():
         if isinstance(obj.data, bpy.types.Mesh):
             yield obj
 
 
-def scene_bbox(single_obj=None, ignore_matrix=False):
+def scene_bbox(single_obj=None, ignore_matrix=False) -> tuple[mathutils.Vector, mathutils.Vector]:
+    """
+    Compute the bounding box of the scene.
+
+    :param single_obj: if not None, only compute the bounding box for this object
+    :param ignore_matrix: if True, ignore the transformation matrix of the object
+    :return: bounding box min and max
+    """
+
     bbox_min = (math.inf,) * 3
     bbox_max = (-math.inf,) * 3
     found = False
@@ -63,11 +90,23 @@ def scene_bbox(single_obj=None, ignore_matrix=False):
     return mathutils.Vector(bbox_min), mathutils.Vector(bbox_max)
 
 
-def get_center(l):
+def get_center(l) -> float:
+    """
+    Compute the center value of a list of numbers.
+    """
+
     return (max(l) + min(l)) / 2 if l else 0.0
 
 
-def scene_sphere(single_obj=None, ignore_matrix=False):
+def scene_sphere(single_obj=None, ignore_matrix=False) -> tuple[mathutils.Vector, float]:
+    """
+    Compute the bounding sphere of the scene.
+
+    :param single_obj: if not None, only compute the bounding sphere for this object
+    :param ignore_matrix: if True, ignore the transformation matrix of the object
+    :return: bounding sphere center and radius
+    """
+
     found = False
     points_co_global = []
     for obj in scene_meshes() if single_obj is None else [single_obj]:
@@ -86,7 +125,16 @@ def scene_sphere(single_obj=None, ignore_matrix=False):
     return b_sphere_center, b_sphere_radius.length
 
 
-def normalize_scene(scale=None, offset=None, use_bounding_sphere=False):
+def normalize_scene(scale=None, offset=None, use_bounding_sphere=False) -> tuple[float, mathutils.Vector]:
+    """
+    Normalize the scene by scaling and translating all objects.
+
+    :param scale: scale factor
+    :param offset: translation offset
+    :param use_bounding_sphere: if True, use the bounding sphere to compute the scale factor
+    :return: scale factor and translation offset
+    """
+
     if scale is None:
         if not use_bounding_sphere:
             bbox_min, bbox_max = scene_bbox()
@@ -108,7 +156,15 @@ def normalize_scene(scale=None, offset=None, use_bounding_sphere=False):
     return scale, offset
 
 
-def scale_from_trimesh(filename, use_bounding_sphere=False):
+def scale_from_trimesh(filename, use_bounding_sphere=False) -> float:
+    """
+    Compute the scale factor from a trimesh file. Some GLB models contains animation data, which can effect the scale
+    factor. This function uses trimesh to compute the scale factor, which can avoid the animation data.
+
+    :param filename: the file name of the 3D object
+    :param use_bounding_sphere: if True, use the bounding sphere to compute the scale factor
+    """
+
     import trimesh
     mesh = trimesh.load(filename, force="mesh")
     if use_bounding_sphere:

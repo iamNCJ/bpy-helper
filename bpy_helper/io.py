@@ -3,18 +3,26 @@ from typing import List, Optional
 import bpy
 
 
-def save_blend_file(filepath):
+def save_blend_file(filepath) -> None:
+    """
+    Save the current blend file
+
+    :param filepath: file path to save
+    """
+
     bpy.ops.wm.save_as_mainfile(filepath=filepath)
 
 
 # adapted from BlenderProc
 def get_nodes_created_in_func(nodes: List[bpy.types.Node], created_in_func: str) -> List[bpy.types.Node]:
-    """ Returns all nodes which are created in the given function
+    """
+    Returns all nodes which are created in the given function
 
     :param nodes: list of nodes of the current material
     :param created_in_func: return all nodes created in the given function
     :return: The list of nodes with the given type.
     """
+
     return [node for node in nodes if "created_in_func" in node and node["created_in_func"] == created_in_func]
 
 
@@ -28,6 +36,7 @@ def get_nodes_with_type(nodes: List[bpy.types.Node], node_type: str,
     :param created_in_func: Only return nodes created by the specified function
     :return: list of nodes, which belong to the type
     """
+
     nodes_with_type = [node for node in nodes if node_type in node.bl_idname]
     if created_in_func:
         nodes_with_type = get_nodes_created_in_func(nodes_with_type, created_in_func)
@@ -46,13 +55,21 @@ def get_the_one_node_with_type(nodes: List[bpy.types.Node], node_type: str,
     :param created_in_func: only return node created by the specified function
     :return: node of the node type
     """
+
     node = get_nodes_with_type(nodes, node_type, created_in_func)
     if node and len(node) == 1:
         return node[0]
     raise RuntimeError(f"There is not only one node of this type: {node_type}, there are: {len(node)}")
 
 
-def render_depth_map(output_dir, file_prefix='depth'):
+def render_depth_map(output_dir, file_prefix='depth') -> None:
+    """
+    Render depth map
+
+    :param output_dir: output directory
+    :param file_prefix: file prefix, default is 'depth'
+    """
+
     # disable material override
     bpy.context.scene.view_layers["ViewLayer"].material_override = None
 
@@ -80,7 +97,6 @@ def render_depth_map(output_dir, file_prefix='depth'):
     bpy.ops.render.render(animation=False, write_still=True)
 
     # Clean up
-    bpy.context.scene.world.node_tree.nodes["Background"].inputs[1].default_value = 1.0
     for link in output_file.inputs[0].links:
         links.remove(link)
     tree.nodes.remove(output_file)
@@ -89,7 +105,14 @@ def render_depth_map(output_dir, file_prefix='depth'):
     bpy.context.view_layer.use_pass_z = False
 
 
-def render_normal_map(output_dir, file_prefix="normal"):
+def render_normal_map(output_dir, file_prefix="normal") -> None:
+    """
+    Render normal map
+
+    :param output_dir: output directory
+    :param file_prefix: file prefix, default is 'normal'
+    """
+
     # disable material override
     bpy.context.scene.view_layers["ViewLayer"].material_override = None
 
@@ -139,5 +162,6 @@ def render_normal_map(output_dir, file_prefix="normal"):
     bpy.context.view_layer.use_pass_normal = False
 
 
+# some helper functions
 mat2list = lambda x: [[float(xxx) for xxx in xx] for xx in x]
 array2list = lambda x: [float(xx) for xx in x]

@@ -1,9 +1,14 @@
 import bpy
 from importlib.metadata import version
+
 IS_BLENDER_4 = version('bpy').split('.')[0] == '4'
 
 
-def clear_emission_and_alpha_nodes():
+def clear_emission_and_alpha_nodes() -> None:
+    """
+    Clear all emission and alpha nodes in the scene, including all objects' materials
+    """
+
     # Loop through all materials in the scene
     for material in bpy.data.materials:
         # Check if the material has an emission shader
@@ -23,7 +28,11 @@ def clear_emission_and_alpha_nodes():
                     node.inputs['Strength'].default_value = 0.
 
 
-def override_normal_map_op(material, normal_map_path):
+def override_normal_map_op(material, normal_map_path) -> None:
+    """
+    Override normal map for the material (to attach a precomputed world-space normal map)
+    """
+
     # Create texture coordinate node
     tex_coord = material.node_tree.nodes.new('ShaderNodeTexCoord')
 
@@ -48,7 +57,15 @@ def override_normal_map_op(material, normal_map_path):
     material.node_tree.links.new(vector_math_2.outputs['Vector'], bsdf.inputs['Normal'])
 
 
-def create_white_diffuse_material(override_normal_map=False, normal_map_path=None):
+def create_white_diffuse_material(override_normal_map=False, normal_map_path=None) -> bpy.types.Material:
+    """
+    Create white diffuse material
+
+    :param override_normal_map: override normal map
+    :param normal_map_path: normal map path
+    :return: white diffuse material
+    """
+
     material = bpy.data.materials.new(name="White_Diffuse_Material")
     material.use_nodes = True
     bsdf = material.node_tree.nodes["Principled BSDF"]
@@ -68,13 +85,22 @@ def create_white_diffuse_material(override_normal_map=False, normal_map_path=Non
     return material
 
 
-# Keys have been remapped: https://wiki.blender.org/wiki/Reference/Release_Notes/4.0/Python_API
-def create_specular_ggx_material(r=0.34, override_normal_map=False, normal_map_path=None):
+def create_specular_ggx_material(r=0.34, override_normal_map=False, normal_map_path=None) -> bpy.types.Material:
+    """
+    Create specular GGX material
+
+    :param r: roughness, default is 0.34
+    :param override_normal_map: whether to override normal map, default is False
+    :param normal_map_path: normal map path, if override_normal_map is True
+    :return: specular GGX material
+    """
+
     material = bpy.data.materials.new(name="Specular_GGX_Material")
     material.use_nodes = True
     bsdf = material.node_tree.nodes["Principled BSDF"]
 
     if IS_BLENDER_4:
+        # Keys have been remapped, ref: https://wiki.blender.org/wiki/Reference/Release_Notes/4.0/Python_API
         bsdf.inputs['Base Color'].default_value = (0, 0, 0, 1)
         bsdf.inputs['Subsurface Weight'].default_value = 0
         bsdf.inputs['Metallic'].default_value = 0

@@ -1,6 +1,5 @@
-import math
 import os
-from typing import Union, List
+from typing import Union
 
 import bpy
 import numpy as np
@@ -9,7 +8,11 @@ from mathutils import Euler, Vector
 from bpy_helper.io import get_the_one_node_with_type
 
 
-def remove_all_lights():
+def remove_all_lights() -> None:
+    """
+    Remove all lights in the scene
+    """
+
     # remove all lights
     light_objs = []
     for obj in bpy.data.objects:
@@ -32,15 +35,16 @@ def remove_all_lights():
             nodes.remove(node)
 
 
-def create_point_light(location, power=800, rgb=(1., 1., 1.), keep_other_lights=False):
+def create_point_light(location, power=800, rgb=(1., 1., 1.), keep_other_lights=False) -> bpy.types.Object:
     """
     Creates a point light at the given location.
-    (This function is deprecated, it's currently kept for backward compatibility, please use create_point_lights instead)
-    :param location:
-    :param power:
-    :param keep_other_lights:
-    :return:
+
+    :param location: The location of the light
+    :param power: The power of the light, default is 800
+    :param keep_other_lights: If true, the other lights will not be removed. Default is False
+    :return: The light object
     """
+
     if not keep_other_lights:
         remove_all_lights()
 
@@ -56,7 +60,17 @@ def create_point_light(location, power=800, rgb=(1., 1., 1.), keep_other_lights=
     return light_obj
 
 
-def create_area_light(location, power=800, size=5., keep_other_lights=False):
+def create_area_light(location, power=800, size=5., keep_other_lights=False) -> bpy.types.Object:
+    """
+    Creates an area light at the given location.
+
+    :param location: The location of the light
+    :param power: The power of the light, default is 800
+    :param size: The size of the light, default is 5
+    :param keep_other_lights: If true, the other lights will not be removed. Default is False
+    :return: The light object
+    """
+
     if not keep_other_lights:
         remove_all_lights()
 
@@ -76,7 +90,17 @@ def create_area_light(location, power=800, size=5., keep_other_lights=False):
     return light_obj
 
 
-def create_directional_light(location, power=800, rgb=(1., 1., 1.), keep_other_lights=False):
+def create_directional_light(location, power=800, rgb=(1., 1., 1.), keep_other_lights=False) -> bpy.types.Object:
+    """
+    Creates a directional light at the given location.
+
+    :param location: The location of the light
+    :param power: The power of the light, default is 800
+    :param rgb: The color of the light, default is white
+    :param keep_other_lights: If true, the other lights will not be removed. Default is False
+    :return: The light object
+    """
+
     if not keep_other_lights:
         remove_all_lights()
 
@@ -95,7 +119,7 @@ def create_directional_light(location, power=800, rgb=(1., 1., 1.), keep_other_l
 
 
 def set_env_light(path_to_hdr_file: str, strength: float = 1.0,
-                  rotation_euler: Union[list, Euler, np.ndarray] = None, keep_other_lights: bool = False):
+                  rotation_euler: Union[list, Euler, np.ndarray] = None, keep_other_lights: bool = False) -> None:
     """
     Sets the world background to the given hdr_file.
 
@@ -104,6 +128,7 @@ def set_env_light(path_to_hdr_file: str, strength: float = 1.0,
     :param rotation_euler: The euler angles of the background.
     :param keep_other_lights: If true, the other lights will not be removed.
     """
+
     if not keep_other_lights:
         remove_all_lights()
 

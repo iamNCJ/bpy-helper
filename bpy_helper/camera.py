@@ -5,55 +5,29 @@ import mathutils
 import numpy as np
 
 
-def create_camera_look_at_object(location, target_object, fov=30):
-    # remove other cameras
+def remove_all_cameras() -> None:
+    """
+    Remove all cameras in the scene
+    """
+
     bpy.ops.object.select_all(action='DESELECT')
     obj = bpy.data.objects.get("Camera")
     if obj is not None:
         obj.select_set(True)
         bpy.ops.object.delete()
 
-    camera_data = bpy.data.cameras.new("Camera")
-    camera_data.angle = fov * (math.pi / 180)  # Convert degrees to radians
-    camera_obj = bpy.data.objects.new("Camera", camera_data)
-    bpy.context.collection.objects.link(camera_obj)
-    camera_obj.location = location
 
-    # Make the camera look at the target object
-    direction = target_object.location - camera_obj.location
-    camera_obj.rotation_euler = direction.to_track_quat('-Z', 'Y').to_euler()
+def create_camera(transform_matrix, fov=30) -> bpy.types.Object:
+    """
+    Create camera in the scene
 
-    return camera_obj
+    :param transform_matrix: camera to world matrix
+    :param fov: field of view in degrees, default is 30
+    :return: camera object
+    """
 
-
-def create_camera_look_at_origin(location, fov=30):
     # remove other cameras
-    bpy.ops.object.select_all(action='DESELECT')
-    obj = bpy.data.objects.get("Camera")
-    if obj is not None:
-        obj.select_set(True)
-        bpy.ops.object.delete()
-
-    camera_data = bpy.data.cameras.new("Camera")
-    camera_data.angle = fov * (math.pi / 180)  # Convert degrees to radians
-    camera_obj = bpy.data.objects.new("Camera", camera_data)
-    bpy.context.collection.objects.link(camera_obj)
-    camera_obj.location = location
-
-    # Make the camera look at the target object
-    direction = mathutils.Vector([0, 0, 0]) - camera_obj.location
-    camera_obj.rotation_euler = direction.to_track_quat('-Z', 'Y').to_euler()
-
-    return camera_obj
-
-
-def create_camera(transform_matrix, fov=30):
-    # remove other cameras
-    bpy.ops.object.select_all(action='DESELECT')
-    obj = bpy.data.objects.get("Camera")
-    if obj is not None:
-        obj.select_set(True)
-        bpy.ops.object.delete()
+    remove_all_cameras()
 
     camera_data = bpy.data.cameras.new("Camera")
     camera_data.angle = fov * (math.pi / 180.)  # Convert degrees to radians
@@ -68,14 +42,16 @@ def create_camera(transform_matrix, fov=30):
     return camera_obj
 
 
-def look_at_to_c2w(camera_position, target_position=[0.0, 0.0, 0.0], up_dir=[0.0, 0.0, 1.0]):
+def look_at_to_c2w(camera_position, target_position=[0.0, 0.0, 0.0], up_dir=[0.0, 0.0, 1.0]) -> np.ndarray:
     """
     Look at transform matrix
+
     :param camera_position: camera position
     :param target_position: target position, default is origin
     :param up_dir: up vector, default is z-axis up
     :return: camera to world matrix
     """
+
     camera_direction = np.array(camera_position) - np.array(target_position)
     camera_direction = camera_direction / np.linalg.norm(camera_direction)
     camera_right = np.cross(np.array(up_dir), camera_direction)

@@ -5,7 +5,19 @@ import numpy as np
 
 
 def gen_random_pts_around_origin(seed, N, min_dist_to_origin, max_dist_to_origin, min_theta_in_degree,
-                                 max_theta_in_degree):
+                                 max_theta_in_degree) -> list:
+    """
+    Generate random points around the origin
+
+    :param seed: random seed
+    :param N: number of points
+    :param min_dist_to_origin: minimum distance to the origin
+    :param max_dist_to_origin: maximum distance to the origin
+    :param min_theta_in_degree: minimum theta in degree
+    :param max_theta_in_degree: maximum theta in degree
+    :return: list of point positions
+    """
+
     random.seed(seed)
     ret = []
     for i in range(N):

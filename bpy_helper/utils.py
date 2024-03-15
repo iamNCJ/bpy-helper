@@ -6,16 +6,21 @@ from contextlib import contextmanager
 @contextmanager
 def stdout_redirected(to=os.devnull):
     """
-    import os
+    A context manager to temporarily redirect stdout to another file. This is useful when you want to suppress the
+    output from blender, especially when you are rendering a large number of images.
 
-    with stdout_redirected(to=filename):
-        print("from Python")
-        os.system("echo non-Python applications are also supported")
+    Example usage:
+    >>> import os
+    >>> filename = os.devnull
+    >>> with stdout_redirected(to=filename):
+    ...     print("from Python")
+    ...     os.system("echo non-Python applications are also supported")
+
+    :param to: The file to redirect stdout to. Default is os.devnull.
+    :return: The context manager.
     """
-    fd = sys.stdout.fileno()
 
-    # assert that Python and C stdio write using the same file descriptor
-    # assert libc.fileno(ctypes.c_void_p.in_dll(libc, "stdout")) == fd == 1
+    fd = sys.stdout.fileno()
 
     def _redirect_stdout(to):
         sys.stdout.close()  # + implicit flush()
@@ -29,5 +34,3 @@ def stdout_redirected(to=os.devnull):
             yield  # allow code to be run with the redirected stdout
         finally:
             _redirect_stdout(to=old_stdout)  # restore stdout.
-            # buffering and flags such as
-            # CLOEXEC may be different
