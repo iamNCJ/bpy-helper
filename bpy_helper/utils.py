@@ -22,15 +22,15 @@ def stdout_redirected(to=os.devnull):
 
     fd = sys.stdout.fileno()
 
-    def _redirect_stdout(to):
+    def _redirect_stdout(_to):
         sys.stdout.close()  # + implicit flush()
-        os.dup2(to.fileno(), fd)  # fd writes to 'to' file
+        os.dup2(_to.fileno(), fd)  # fd writes to '_to' file
         sys.stdout = os.fdopen(fd, 'w')  # Python writes to fd
 
     with os.fdopen(os.dup(fd), 'w') as old_stdout:
         with open(to, 'w') as file:
-            _redirect_stdout(to=file)
+            _redirect_stdout(_to=file)
         try:
             yield  # allow code to be run with the redirected stdout
         finally:
-            _redirect_stdout(to=old_stdout)  # restore stdout.
+            _redirect_stdout(_to=old_stdout)  # restore stdout.
