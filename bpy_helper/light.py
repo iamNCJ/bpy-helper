@@ -35,12 +35,15 @@ def remove_all_lights() -> None:
             nodes.remove(node)
 
 
-def create_point_light(location, power=800, rgb=(1., 1., 1.), keep_other_lights=False) -> bpy.types.Object:
+def create_point_light(location, power=800, rgb=(1., 1., 1.), hard_shadow=False, keep_other_lights=False) \
+        -> bpy.types.Object:
     """
     Creates a point light at the given location.
 
     :param location: The location of the light
     :param power: The power of the light, default is 800
+    :param rgb: The color of the light, default is white
+    :param hard_shadow: If true, the shadow will be hard. Default is False
     :param keep_other_lights: If true, the other lights will not be removed. Default is False
     :return: The light object
     """
@@ -54,6 +57,8 @@ def create_point_light(location, power=800, rgb=(1., 1., 1.), keep_other_lights=
     light_data = bpy.data.lights.new(name="PointLight", type="POINT")
     light_data.energy = power
     light_data.color = rgb
+    if hard_shadow:
+        light_data.shadow_soft_size = 0
     light_obj = bpy.data.objects.new("PointLight", light_data)
     bpy.context.collection.objects.link(light_obj)
     light_obj.location = location

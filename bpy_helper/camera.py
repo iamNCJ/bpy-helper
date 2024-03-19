@@ -30,6 +30,7 @@ def create_camera(transform_matrix, fov=30) -> bpy.types.Object:
     remove_all_cameras()
 
     camera_data = bpy.data.cameras.new("Camera")
+    camera_data.lens_unit = 'FOV'
     camera_data.angle = fov * (math.pi / 180.)  # Convert degrees to radians
     camera_obj = bpy.data.objects.new("Camera", camera_data)
     bpy.context.collection.objects.link(camera_obj)
