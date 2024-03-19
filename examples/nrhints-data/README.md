@@ -1,0 +1,2 @@
+# NRHints Data
+This repository contains the data rendering scripts for the paper [NRHints: Relighting Neural Radiance Fields with Shadow and Highlight Hints](https://nrhints.github.io/). The scripts are derived from the data rendering scripts of NRHints and refactored with `bpy-helper`.
