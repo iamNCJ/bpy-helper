@@ -38,7 +38,7 @@ def import_3d_model(object_path) -> None:
     if object_path.endswith(".glb"):
         bpy.ops.import_scene.gltf(filepath=object_path, merge_vertices=True)
     elif object_path.endswith(".obj"):
-        bpy.ops.import_scene.obj(filepath=object_path)
+        bpy.ops.wm.obj_import(filepath=object_path)
     elif object_path.endswith(".fbx"):
         bpy.ops.import_scene.fbx(filepath=object_path)
     elif object_path.endswith(".blend"):
@@ -127,23 +127,24 @@ def scene_sphere(single_obj=None, ignore_matrix=False) -> tuple[mathutils.Vector
     return b_sphere_center, b_sphere_radius.length
 
 
-def normalize_scene(scale=None, offset=None, use_bounding_sphere=False) -> tuple[float, mathutils.Vector]:
+def normalize_scene(scale=None, offset=None, use_bounding_sphere=False, target_scale=0.5) -> tuple[float, mathutils.Vector]:
     """
     Normalize the scene by scaling and translating all objects.
 
     :param scale: scale factor
     :param offset: translation offset
     :param use_bounding_sphere: if True, use the bounding sphere to compute the scale factor
+    :param target_scale: the target scale factor
     :return: scale factor and translation offset
     """
 
     if scale is None:
         if not use_bounding_sphere:
             bbox_min, bbox_max = scene_bbox()
-            scale = 0.5 / max(bbox_max - bbox_min)
+            scale = target_scale / max(bbox_max - bbox_min)
         else:
             center, radius = scene_sphere()
-            scale = 0.5 / radius
+            scale = target_scale / radius
     for obj in scene_root_objects():
         obj.scale = obj.scale * scale
 
