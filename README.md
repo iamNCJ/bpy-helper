@@ -17,3 +17,4 @@ pip install bpy-helper
 ## Projects using bpy-helper
 
 - [NRHints: Relighting Neural Radiance Fields with Shadow and Highlight Hints](https://nrhints.github.io/): bpy-helper is derived from the data rendering scripts of NRHints.
+- [DiLightNet: Fine-grained Lighting Control for Diffusion-based Image Generation](https://dilightnet.github.io/): bpy-helper is used to render the training data and radiance hints for DiLightNet.
