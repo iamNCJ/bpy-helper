@@ -43,6 +43,8 @@ def import_3d_model(object_path) -> None:
         bpy.ops.import_scene.fbx(filepath=object_path)
     elif object_path.endswith(".blend"):
         bpy.ops.wm.open_mainfile(filepath=object_path)
+    elif object_path.endswith(".ply"):
+        bpy.ops.import_mesh.ply(filepath=object_path)
     else:
         raise ValueError(f"Unsupported file type: {object_path}")
 
