@@ -85,6 +85,38 @@ def create_white_diffuse_material(override_normal_map=False, normal_map_path=Non
     return material
 
 
+def create_white_emmissive_material(strength=100., override_normal_map=False, normal_map_path=None) -> bpy.types.Material:
+    """
+    Create white emissive material
+
+    :param override_normal_map: override normal map
+    :param normal_map_path: normal map path
+    :return: white emissive material
+    """
+
+    material = bpy.data.materials.new(name="White_Emissive_Material")
+    material.use_nodes = True
+    bsdf = material.node_tree.nodes["Principled BSDF"]
+
+    if IS_BLENDER_4:
+        bsdf.inputs['Base Color'].default_value = (1, 1, 1, 1)
+        bsdf.inputs['Specular IOR Level'].default_value = 0
+        bsdf.inputs['Roughness'].default_value = 1
+        bsdf.inputs['Emission Color'].default_value = (1, 1, 1, 1)
+        bsdf.inputs['Emission Strength'].default_value = strength
+    else:
+        bsdf.inputs['Base Color'].default_value = (1, 1, 1, 1)
+        bsdf.inputs['Specular'].default_value = 0
+        bsdf.inputs['Roughness'].default_value = 1
+        bsdf.inputs['Emission'].default_value = (1, 1, 1, 1)
+        bsdf.inputs['Emission Strength'].default_value = strength
+
+    if override_normal_map:
+        override_normal_map_op(material, normal_map_path)
+
+    return material
+
+
 def create_specular_ggx_material(r=0.34, override_normal_map=False, normal_map_path=None) -> bpy.types.Material:
     """
     Create specular GGX material
