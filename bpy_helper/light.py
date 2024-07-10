@@ -35,7 +35,7 @@ def remove_all_lights() -> None:
             nodes.remove(node)
 
 
-def create_point_light(location, power=800, rgb=(1., 1., 1.), hard_shadow=False, keep_other_lights=False) \
+def create_point_light(location, power=800., rgb=(1., 1., 1.), hard_shadow=False, keep_other_lights=False) \
         -> bpy.types.Object:
     """
     Creates a point light at the given location.
@@ -65,7 +65,7 @@ def create_point_light(location, power=800, rgb=(1., 1., 1.), hard_shadow=False,
     return light_obj
 
 
-def create_area_light(location, power=800, size=5., keep_other_lights=False) -> bpy.types.Object:
+def create_area_light(location, power=800., size=5., keep_other_lights=False) -> bpy.types.Object:
     """
     Creates an area light at the given location.
 
@@ -95,7 +95,7 @@ def create_area_light(location, power=800, size=5., keep_other_lights=False) -> 
     return light_obj
 
 
-def create_directional_light(location, power=800, rgb=(1., 1., 1.), keep_other_lights=False) -> bpy.types.Object:
+def create_directional_light(location, power=800., rgb=(1., 1., 1.), keep_other_lights=False) -> bpy.types.Object:
     """
     Creates a directional light at the given location.
 
