@@ -170,3 +170,19 @@ def create_specular_ggx_material(r=0.34, override_normal_map=False, normal_map_p
         override_normal_map_op(material, normal_map_path)
 
     return material
+
+
+def create_invisible_material() -> bpy.types.Material:
+    """
+    Create invisible material
+
+    :return: invisible material
+    """
+
+    material = bpy.data.materials.new(name="Invisible_Material")
+    material.use_nodes = True
+    bsdf = material.node_tree.nodes["Principled BSDF"]
+
+    bsdf.inputs['Alpha'].default_value = 0.
+
+    return material
