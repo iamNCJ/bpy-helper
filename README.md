@@ -2,7 +2,7 @@
 
 A lightweight alternative to BlenderProc
 
-[![Upload Python Package](https://github.com/iamNCJ/bpy-helper/actions/workflows/python-publish.yml/badge.svg)](https://github.com/iamNCJ/bpy-helper/actions/workflows/python-publish.yml)
+[![PyPI version](https://badge.fury.io/py/bpy-helper.svg)](https://pypi.org/project/bpy-helper/) [![Upload Python Package](https://github.com/iamNCJ/bpy-helper/actions/workflows/python-publish.yml/badge.svg)](https://github.com/iamNCJ/bpy-helper/actions/workflows/python-publish.yml)
 
 ## Why bpy-helper instead of BlenderProc?
 
