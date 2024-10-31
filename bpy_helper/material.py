@@ -57,16 +57,17 @@ def override_normal_map_op(material, normal_map_path) -> None:
     material.node_tree.links.new(vector_math_2.outputs['Vector'], bsdf.inputs['Normal'])
 
 
-def create_white_diffuse_material(override_normal_map=False, normal_map_path=None) -> bpy.types.Material:
+def create_white_diffuse_material(override_normal_map=False, normal_map_path=None, material_name="White_Diffuse_Material") -> bpy.types.Material:
     """
     Create white diffuse material
 
     :param override_normal_map: override normal map
     :param normal_map_path: normal map path
+    :param material_name: material name, default is "White_Diffuse_Material"
     :return: white diffuse material
     """
 
-    material = bpy.data.materials.new(name="White_Diffuse_Material")
+    material = bpy.data.materials.new(name=material_name)
     material.use_nodes = True
     bsdf = material.node_tree.nodes["Principled BSDF"]
 
@@ -85,16 +86,18 @@ def create_white_diffuse_material(override_normal_map=False, normal_map_path=Non
     return material
 
 
-def create_white_emmissive_material(strength=100., override_normal_map=False, normal_map_path=None) -> bpy.types.Material:
+def create_white_emmissive_material(strength=100., override_normal_map=False, normal_map_path=None, material_name="White_Emissive_Material") -> bpy.types.Material:
     """
     Create white emissive material
 
+    :param strength: emission strength
     :param override_normal_map: override normal map
     :param normal_map_path: normal map path
+    :param material_name: material name, default is "White_Emissive_Material"
     :return: white emissive material
     """
 
-    material = bpy.data.materials.new(name="White_Emissive_Material")
+    material = bpy.data.materials.new(name=material_name)
     material.use_nodes = True
     bsdf = material.node_tree.nodes["Principled BSDF"]
 
@@ -117,17 +120,18 @@ def create_white_emmissive_material(strength=100., override_normal_map=False, no
     return material
 
 
-def create_specular_ggx_material(r=0.34, override_normal_map=False, normal_map_path=None) -> bpy.types.Material:
+def create_specular_ggx_material(r=0.34, override_normal_map=False, normal_map_path=None, material_name="Specular_GGX_Material") -> bpy.types.Material:
     """
     Create specular GGX material
 
     :param r: roughness, default is 0.34
     :param override_normal_map: whether to override normal map, default is False
     :param normal_map_path: normal map path, if override_normal_map is True
+    :param material_name: material name, default is "Specular_GGX_Material"
     :return: specular GGX material
     """
 
-    material = bpy.data.materials.new(name="Specular_GGX_Material")
+    material = bpy.data.materials.new(name=material_name)
     material.use_nodes = True
     bsdf = material.node_tree.nodes["Principled BSDF"]
 
@@ -172,14 +176,15 @@ def create_specular_ggx_material(r=0.34, override_normal_map=False, normal_map_p
     return material
 
 
-def create_invisible_material() -> bpy.types.Material:
+def create_invisible_material(material_name="Invisible_Material") -> bpy.types.Material:
     """
     Create invisible material
 
+    :param material_name: material name, default is "Invisible_Material"
     :return: invisible material
     """
 
-    material = bpy.data.materials.new(name="Invisible_Material")
+    material = bpy.data.materials.new(name=material_name)
     material.use_nodes = True
     bsdf = material.node_tree.nodes["Principled BSDF"]
 
