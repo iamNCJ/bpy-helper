@@ -19,7 +19,8 @@ def gen_random_pts_around_origin(seed, N, min_dist_to_origin, max_dist_to_origin
     :return: list of point positions
     """
 
-    random.seed(seed)
+    if seed is not None:
+        random.seed(seed)
     ret = []
     for i in range(N):
         phi = 2 * math.pi * random.random()
