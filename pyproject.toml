@@ -9,10 +9,9 @@ readme = "README.md"
 authors = [
     { name = "NCJ", email = "me@ncj.wiki" },
 ]
-license = { file = "LICENSE" }
+license = "MIT"
 classifiers = [
     "Programming Language :: Python :: 3",
-    "License :: OSI Approved :: MIT License",
     "Operating System :: POSIX :: Linux",
     "Operating System :: MacOS",
     "Topic :: Multimedia :: Graphics :: 3D Rendering"
