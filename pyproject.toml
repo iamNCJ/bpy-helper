@@ -1,5 +1,6 @@
 [build-system]
-requires = ["setuptools", "wheel"]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
 
 [project]
 name = "bpy_helper"
@@ -16,6 +17,7 @@ classifiers = [
     "Operating System :: MacOS",
     "Topic :: Multimedia :: Graphics :: 3D Rendering"
 ]
+requires-python = ">=3.10"
 dependencies = [
     "bpy>=3.4.0",
     "numpy"
