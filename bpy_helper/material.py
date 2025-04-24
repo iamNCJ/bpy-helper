@@ -1,7 +1,10 @@
 import bpy
 from importlib.metadata import version
 
-IS_BLENDER_4 = version('bpy').split('.')[0] == '4'
+try:
+    IS_BLENDER_4 = version('bpy').split('.')[0] == '4'
+except:
+    IS_BLENDER_4 = True  # assume bpy 4.0 if running inside Blender Extension
 
 
 def clear_emission_and_alpha_nodes() -> None:
