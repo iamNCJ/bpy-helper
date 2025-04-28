@@ -35,15 +35,16 @@ def import_3d_model(object_path) -> None:
     Loads a 3d model into the scene.
     """
 
-    if object_path.endswith(".glb"):
+    object_path_lower = object_path.lower()
+    if object_path_lower.endswith(".glb"):
         bpy.ops.import_scene.gltf(filepath=object_path, merge_vertices=True)
-    elif object_path.endswith(".obj"):
+    elif object_path_lower.endswith(".obj"):
         bpy.ops.wm.obj_import(filepath=object_path)
-    elif object_path.endswith(".fbx"):
+    elif object_path_lower.endswith(".fbx"):
         bpy.ops.import_scene.fbx(filepath=object_path)
-    elif object_path.endswith(".blend"):
+    elif object_path_lower.endswith(".blend"):
         bpy.ops.wm.open_mainfile(filepath=object_path)
-    elif object_path.endswith(".ply"):
+    elif object_path_lower.endswith(".ply"):
         bpy.ops.import_mesh.ply(filepath=object_path)
     else:
         raise ValueError(f"Unsupported file type: {object_path}")
