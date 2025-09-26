@@ -19,3 +19,4 @@ pip install bpy-helper
 - [NRHints: Relighting Neural Radiance Fields with Shadow and Highlight Hints](https://nrhints.github.io/): bpy-helper is derived from the data rendering scripts of NRHints.
 - [DiLightNet: Fine-grained Lighting Control for Diffusion-based Image Generation](https://dilightnet.github.io/): bpy-helper is used to render the training data and radiance hints for DiLightNet.
 - [GS^3: Efficient Relighting with Triple Gaussian Splatting](https://gsrelight.github.io/): bpy-helper is used to render the training data for GS^3.
+- [RenderFormer: Transformer-based Neural Rendering of Triangle Meshes with Global Illumination](https://microsoft.github.io/renderformer/): bpy-helper is used to render the training data and reference images for RenderFormer.

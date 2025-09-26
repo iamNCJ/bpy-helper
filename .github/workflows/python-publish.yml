@@ -9,6 +9,9 @@
 name: Upload Python Package
 
 on:
+  # manually trigger the workflow
+  workflow_dispatch:
+  # trigger the workflow when a release is created
   release:
     types: [published]
 
