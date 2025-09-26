@@ -175,6 +175,7 @@ def create_compositing_nodes(
     enable_normal=False,
     enable_diffuse=False,
     enable_glossy=False,
+    use_denoising=True,
 ):
     """
     Create compositing nodes
@@ -183,6 +184,7 @@ def create_compositing_nodes(
     :param enable_normal: enable normal pass
     :param enable_diffuse: enable diffuse-only pass (view-independent effects)
     :param enable_glossy: enable glossy-only pass (view-dependent effects)
+    :param use_denoising: use denoising
     """
     
     bpy.context.scene.render.use_compositing = True
@@ -267,6 +269,97 @@ def create_compositing_nodes(
         # Connect normal output
         links.new(combine_rgba.outputs["Image"], normal_output.inputs['Image'])
 
+    if enable_diffuse:
+        # Enable diffuse pass
+        bpy.context.view_layer.use_pass_diffuse_direct = True
+        bpy.context.view_layer.use_pass_diffuse_indirect = True
+        bpy.context.view_layer.use_pass_diffuse_color = True
+        
+        # Create file output node for diffuse
+        diffuse_output = tree.nodes.new("CompositorNodeOutputFile")
+        diffuse_output.name = DIFFUSE_OUTPUT_NODE_NAME
+        diffuse_output.base_path = "/tmp"  # placeholder path
+        diffuse_output.format.file_format = "OPEN_EXR"
+        diffuse_output.file_slots.values()[0].path = "diffuse"
+        diffuse_output.location = (1000, 0)
+
+        # Compose diffuse output
+        vecter_add = tree.nodes.new("ShaderNodeVectorMath")
+        vecter_add.operation = "ADD"
+        vecter_add.location = (600, 0)
+        links.new(render_layer_node.outputs["DiffDir"], vecter_add.inputs[0])
+        links.new(render_layer_node.outputs["DiffInd"], vecter_add.inputs[1])
+
+        vector_multiply = tree.nodes.new("ShaderNodeVectorMath")
+        vector_multiply.operation = "MULTIPLY"
+        vector_multiply.location = (800, 0)
+        links.new(vecter_add.outputs[0], vector_multiply.inputs[0])
+        links.new(render_layer_node.outputs["DiffCol"], vector_multiply.inputs[1])
+
+        if use_denoising:
+            # enable denoising data
+            bpy.context.view_layer.cycles.denoising_store_passes = True
+
+            # create denoising node
+            denoising = tree.nodes.new("CompositorNodeDenoise")
+            denoising.location = (1000, 0)
+            diffuse_output.location = (1200, 0)
+
+            # connect diffuse output and albedo/normal for denoising
+            links.new(vector_multiply.outputs[0], denoising.inputs['Image'])
+            links.new(render_layer_node.outputs["Denoising Albedo"], denoising.inputs['Albedo'])
+            links.new(render_layer_node.outputs["Denoising Normal"], denoising.inputs['Normal'])
+
+            # output denoising image
+            links.new(denoising.outputs['Image'], diffuse_output.inputs['Image'])
+        else:
+            links.new(vector_multiply.outputs[0], diffuse_output.inputs['Image'])
+
+    if enable_glossy:
+        # Enable glossy pass
+        bpy.context.view_layer.use_pass_glossy_direct = True
+        bpy.context.view_layer.use_pass_glossy_indirect = True
+        bpy.context.view_layer.use_pass_glossy_color = True
+        
+        # Create file output node for glossy
+        glossy_output = tree.nodes.new("CompositorNodeOutputFile")
+        glossy_output.name = GLOSSY_OUTPUT_NODE_NAME
+        glossy_output.base_path = "/tmp"  # placeholder path
+        glossy_output.format.file_format = "OPEN_EXR"
+        glossy_output.file_slots.values()[0].path = "glossy"
+        glossy_output.location = (1000, -200)
+        
+        # Compose glossy output
+        vecter_add = tree.nodes.new("ShaderNodeVectorMath")
+        vecter_add.operation = "ADD"
+        vecter_add.location = (600, -200)
+        links.new(render_layer_node.outputs["GlossDir"], vecter_add.inputs[0])
+        links.new(render_layer_node.outputs["GlossInd"], vecter_add.inputs[1])
+        
+        vector_multiply = tree.nodes.new("ShaderNodeVectorMath")
+        vector_multiply.operation = "MULTIPLY"
+        vector_multiply.location = (800, -200)
+        links.new(vecter_add.outputs[0], vector_multiply.inputs[0])
+        links.new(render_layer_node.outputs["GlossCol"], vector_multiply.inputs[1])
+        
+        if use_denoising:
+            # enable denoising data
+            bpy.context.view_layer.cycles.denoising_store_passes = True
+            
+            # create denoising node
+            denoising = tree.nodes.new("CompositorNodeDenoise")
+            denoising.location = (1000, -250)
+            glossy_output.location = (1200, -250)
+            
+            # connect glossy output and albedo/normal for denoising
+            links.new(vector_multiply.outputs[0], denoising.inputs['Image'])
+            links.new(render_layer_node.outputs["Denoising Albedo"], denoising.inputs['Albedo'])
+            links.new(render_layer_node.outputs["Denoising Normal"], denoising.inputs['Normal'])
+            
+            # output denoising image
+            links.new(denoising.outputs['Image'], glossy_output.inputs['Image'])
+        else:
+            links.new(vector_multiply.outputs[0], glossy_output.inputs['Image'])
 
 def render_with_compositing_nodes(output_folder_path):
     ...
