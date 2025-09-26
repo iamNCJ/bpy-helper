@@ -162,6 +162,115 @@ def render_normal_map(output_dir, file_prefix="normal") -> None:
     bpy.context.view_layer.use_pass_normal = False
 
 
+# Constants for compositing node names
+RGB_OUTPUT_NODE_NAME = "BPYHelperRGBOutput"
+DEPTH_OUTPUT_NODE_NAME = "BPYHelperDepthOutput"
+NORMAL_OUTPUT_NODE_NAME = "BPYHelperNormalOutput"
+DIFFUSE_OUTPUT_NODE_NAME = "BPYHelperDiffuseOutput"
+GLOSSY_OUTPUT_NODE_NAME = "BPYHelperGlossyOutput"
+
+
+def create_compositing_nodes(
+    enable_depth=False,
+    enable_normal=False,
+    enable_diffuse=False,
+    enable_glossy=False,
+):
+    """
+    Create compositing nodes
+
+    :param enable_depth: enable depth pass
+    :param enable_normal: enable normal pass
+    :param enable_diffuse: enable diffuse-only pass (view-independent effects)
+    :param enable_glossy: enable glossy-only pass (view-dependent effects)
+    """
+    
+    bpy.context.scene.render.use_compositing = True
+    bpy.context.scene.use_nodes = True
+    
+    tree = bpy.context.scene.node_tree
+    links = tree.links
+    
+    # Clear existing nodes to avoid conflicts
+    for node in tree.nodes:
+        tree.nodes.remove(node)
+    
+    # Create render layer node
+    render_layer_node = tree.nodes.new("CompositorNodeRLayers")
+    
+    # Create composite output node
+    composite_output = tree.nodes.new("CompositorNodeComposite")
+    composite_output.location = (400, 0)
+    
+    # Create RGB file output node
+    rgb_output = tree.nodes.new("CompositorNodeOutputFile")
+    rgb_output.name = RGB_OUTPUT_NODE_NAME
+    rgb_output.base_path = "/tmp"  # placeholder path
+    rgb_output.format.file_format = "OPEN_EXR"
+    rgb_output.file_slots.values()[0].path = "rgb"
+    rgb_output.location = (400, -100)
+    
+    # Connect render layer to both composite and file output for RGB
+    links.new(render_layer_node.outputs["Image"], composite_output.inputs["Image"])
+    links.new(render_layer_node.outputs["Image"], rgb_output.inputs["Image"])
+    
+    if enable_depth:
+        # Enable z-buffer pass
+        bpy.context.view_layer.use_pass_z = True
+        
+        # Create file output node for depth
+        depth_output = tree.nodes.new("CompositorNodeOutputFile")
+        depth_output.name = DEPTH_OUTPUT_NODE_NAME
+        depth_output.base_path = "/tmp"  # placeholder path
+        depth_output.format.file_format = "OPEN_EXR"
+        depth_output.file_slots.values()[0].path = "depth"
+        depth_output.location = (400, -250)
+        
+        # Connect depth output
+        links.new(render_layer_node.outputs["Depth"], depth_output.inputs['Image'])
+    
+    if enable_normal:
+        # Enable normal pass
+        bpy.context.view_layer.use_pass_normal = True
+        
+        # Separate into RGB
+        separate_rgba = tree.nodes.new("CompositorNodeSepRGBA")
+        separate_rgba.location = (200, -400)
+        links.new(render_layer_node.outputs["Normal"], separate_rgba.inputs["Image"])
+        
+        # Create map range nodes for each channel
+        map_range_nodes = []
+        for i in range(3):
+            map_range = tree.nodes.new("CompositorNodeMapRange")
+            map_range.inputs["From Min"].default_value = -1.0
+            map_range.inputs["From Max"].default_value = 1.0
+            map_range.inputs["To Min"].default_value = 0.0
+            map_range.inputs["To Max"].default_value = 1.0
+            map_range.location = (400, -400 - i * 200)
+            map_range_nodes.append(map_range)
+            links.new(separate_rgba.outputs[i], map_range.inputs["Value"])
+        
+        # Combine back to RGBA
+        combine_rgba = tree.nodes.new("CompositorNodeCombRGBA")
+        combine_rgba.location = (600, -400)
+        for i, map_range in enumerate(map_range_nodes):
+            links.new(map_range.outputs["Value"], combine_rgba.inputs[i])
+        
+        # Create file output node for normal
+        normal_output = tree.nodes.new("CompositorNodeOutputFile")
+        normal_output.name = NORMAL_OUTPUT_NODE_NAME
+        normal_output.base_path = "/tmp"  # placeholder path
+        normal_output.format.file_format = "OPEN_EXR"
+        normal_output.file_slots.values()[0].path = "normal"
+        normal_output.location = (800, -400)
+        
+        # Connect normal output
+        links.new(combine_rgba.outputs["Image"], normal_output.inputs['Image'])
+
+
+def render_with_compositing_nodes(output_folder_path):
+    ...
+
 # some helper functions
 mat2list = lambda x: [[float(xxx) for xxx in xx] for xx in x]
 array2list = lambda x: [float(xx) for xx in x]
