@@ -361,8 +361,13 @@ def create_compositing_nodes(
         else:
             links.new(vector_multiply.outputs[0], glossy_output.inputs['Image'])
 
-def render_with_compositing_nodes(output_folder_path):
-    ...
+def render_with_compositing_nodes(output_folder_path, verbose=False):
+    output_nodes = get_nodes_with_type(bpy.context.scene.node_tree.nodes, "CompositorNodeOutputFile")
+    for node in output_nodes:
+        node.base_path = output_folder_path
+        if verbose:
+            print(f"Setting {node.name} output path to {node.base_path}")
+    bpy.ops.render.render(animation=False, write_still=True)
 
 # some helper functions
 mat2list = lambda x: [[float(xxx) for xxx in xx] for xx in x]
