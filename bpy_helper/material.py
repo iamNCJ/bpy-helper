@@ -123,7 +123,7 @@ def create_white_emmissive_material(strength=100., override_normal_map=False, no
     return material
 
 
-def create_emissive_material(strength=100., color=(1, 1, 1), material_name="Emissive_Material") -> bpy.types.Material:
+def create_emissive_material(strength=100., color=(1., 1., 1.), material_name="Emissive_Material") -> bpy.types.Material:
     """
     Create emissive material
 
@@ -138,16 +138,16 @@ def create_emissive_material(strength=100., color=(1, 1, 1), material_name="Emis
     bsdf = material.node_tree.nodes["Principled BSDF"]
 
     if IS_BLENDER_4:
-        bsdf.inputs['Base Color'].default_value = (1, 1, 1, 1)
+        bsdf.inputs['Base Color'].default_value = (1., 1., 1., 1.)
         bsdf.inputs['Specular IOR Level'].default_value = 0
         bsdf.inputs['Roughness'].default_value = 1
-        bsdf.inputs['Emission Color'].default_value = (color[0], color[1], color[2], 1)
+        bsdf.inputs['Emission Color'].default_value = (color[0], color[1], color[2], 1.)
         bsdf.inputs['Emission Strength'].default_value = strength
     else:
-        bsdf.inputs['Base Color'].default_value = (1, 1, 1, 1)
+        bsdf.inputs['Base Color'].default_value = (1., 1., 1., 1.)
         bsdf.inputs['Specular'].default_value = 0
         bsdf.inputs['Roughness'].default_value = 1
-        bsdf.inputs['Emission'].default_value = (color[0], color[1], color[2], 1)
+        bsdf.inputs['Emission'].default_value = (color[0], color[1], color[2], 1.)
         bsdf.inputs['Emission Strength'].default_value = strength
 
 def create_specular_ggx_material(r=0.34, override_normal_map=False, normal_map_path=None, material_name="Specular_GGX_Material") -> bpy.types.Material:
