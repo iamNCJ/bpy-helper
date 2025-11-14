@@ -150,6 +150,9 @@ def create_emissive_material(strength=100., color=(1., 1., 1.), material_name="E
         bsdf.inputs['Emission'].default_value = (color[0], color[1], color[2], 1.)
         bsdf.inputs['Emission Strength'].default_value = strength
 
+    return material
+
+
 def create_specular_ggx_material(r=0.34, override_normal_map=False, normal_map_path=None, material_name="Specular_GGX_Material") -> bpy.types.Material:
     """
     Create specular GGX material
