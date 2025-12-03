@@ -168,6 +168,7 @@ DEPTH_OUTPUT_NODE_NAME = "BPYHelperDepthOutput"
 NORMAL_OUTPUT_NODE_NAME = "BPYHelperNormalOutput"
 DIFFUSE_OUTPUT_NODE_NAME = "BPYHelperDiffuseOutput"
 GLOSSY_OUTPUT_NODE_NAME = "BPYHelperGlossyOutput"
+ALBEDO_OUTPUT_NODE_NAME = "BPYHelperAlbedoOutput"
 
 
 def create_compositing_nodes(
@@ -175,6 +176,7 @@ def create_compositing_nodes(
     enable_normal=False,
     enable_diffuse=False,
     enable_glossy=False,
+    enable_albedo=False,
     use_denoising=True,
 ):
     """
@@ -184,6 +186,7 @@ def create_compositing_nodes(
     :param enable_normal: enable normal pass
     :param enable_diffuse: enable diffuse-only pass (view-independent effects)
     :param enable_glossy: enable glossy-only pass (view-dependent effects)
+    :param enable_albedo: enable albedo pass
     :param use_denoising: use denoising
     """
     
@@ -360,6 +363,21 @@ def create_compositing_nodes(
             links.new(denoising.outputs['Image'], glossy_output.inputs['Image'])
         else:
             links.new(vector_multiply.outputs[0], glossy_output.inputs['Image'])
+
+    if enable_albedo:
+        # Enable albedo pass
+        bpy.context.view_layer.use_pass_diffuse_color = True
+        
+        # Create file output node for albedo
+        albedo_output = tree.nodes.new("CompositorNodeOutputFile")
+        albedo_output.name = ALBEDO_OUTPUT_NODE_NAME
+        albedo_output.base_path = "/tmp"  # placeholder path
+        albedo_output.format.file_format = "OPEN_EXR"
+        albedo_output.file_slots.values()[0].path = "albedo"
+        albedo_output.location = (1000, -400)
+
+        # Connect albedo output
+        links.new(render_layer_node.outputs["DiffCol"], albedo_output.inputs['Image'])
 
 def render_with_compositing_nodes(output_folder_path, verbose=False):
     output_nodes = get_nodes_with_type(bpy.context.scene.node_tree.nodes, "CompositorNodeOutputFile")
