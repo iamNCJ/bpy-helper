@@ -364,3 +364,60 @@ def create_specular_roughness_material(diffuse_color=(1.0, 1.0, 1.0), specular_c
     links.new(specular_rough.outputs['Shader'], material_output.inputs['Surface'])
     
     return material
+
+
+def create_full_principled_bsdf_material(base_color=(0, 0, 0), metallic=0.0, roughness=1.0, transmission_weight=0.0, ior=1.5, material_name="Full_Principled_BSDF_Material") -> bpy.types.Material:
+    """
+    Create full principled BSDF material
+
+    :param base_color: base color, default is (0, 0, 0)
+    :param metallic: metallic, default is 0.0
+    :param roughness: roughness, default is 1.0
+    :param transmission_weight: transmission weight, default is 0.0
+    :param ior: index of refraction, default is 1.5
+    :param material_name: material name, default is "Full_Principled_BSDF_Material"
+    :return: full principled BSDF material
+    """
+
+    material = bpy.data.materials.new(name=material_name)
+    material.use_nodes = True
+    bsdf = material.node_tree.nodes["Principled BSDF"]
+
+    if IS_BLENDER_4:
+        # Keys have been remapped, ref: https://wiki.blender.org/wiki/Reference/Release_Notes/4.0/Python_API
+        bsdf.inputs['Base Color'].default_value = (base_color[0], base_color[1], base_color[2], 1)
+        bsdf.inputs['Subsurface Weight'].default_value = 0
+        bsdf.inputs['Metallic'].default_value = metallic
+        bsdf.inputs['Specular IOR Level'].default_value = 1
+        bsdf.inputs['Specular Tint'].default_value = (1, 1, 1, 1)
+        bsdf.inputs['Roughness'].default_value = roughness
+        bsdf.inputs['Anisotropic'].default_value = 0
+        bsdf.inputs['Anisotropic Rotation'].default_value = 0.5
+        bsdf.inputs['Sheen Weight'].default_value = 0
+        bsdf.inputs['Sheen Tint'].default_value = (0, 0, 0, 1)
+        bsdf.inputs['Coat Weight'].default_value = 0
+        bsdf.inputs['Coat Roughness'].default_value = 0
+        bsdf.inputs['Transmission Weight'].default_value = transmission_weight
+        bsdf.inputs['Emission Color'].default_value = (0, 0, 0, 1)
+        bsdf.inputs['Alpha'].default_value = 1
+        bsdf.inputs['IOR'].default_value = ior
+    else:
+        bsdf.inputs['Base Color'].default_value = (base_color[0], base_color[1], base_color[2], 1)
+        bsdf.inputs['Subsurface'].default_value = 0
+        bsdf.inputs['Metallic'].default_value = metallic
+        bsdf.inputs['Specular'].default_value = 1
+        bsdf.inputs['Specular Tint'].default_value = 1
+        bsdf.inputs['Roughness'].default_value = roughness
+        bsdf.inputs['Anisotropic'].default_value = 0
+        bsdf.inputs['Anisotropic Rotation'].default_value = 0.5
+        bsdf.inputs['Sheen'].default_value = 0
+        bsdf.inputs['Sheen Tint'].default_value = 0
+        bsdf.inputs['Clearcoat'].default_value = 0
+        bsdf.inputs['Clearcoat Roughness'].default_value = 0
+        bsdf.inputs['IOR'].default_value = ior
+        bsdf.inputs['Transmission'].default_value = transmission_weight
+        bsdf.inputs['Transmission Roughness'].default_value = 0
+        bsdf.inputs['Emission'].default_value = (0, 0, 0, 1)
+        bsdf.inputs['Alpha'].default_value = 1
+
+    return material
